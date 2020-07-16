@@ -16,7 +16,7 @@ def get_all():
     try:
         return jsonify(DataLayer().read_all_students())
     except Exception as e:
-        return jsonify({"error": (str(e))})
+        return jsonify({"message": f"error- {(str(e))}"})
 
 
 @app.route('/get_students/<field>/<value>', methods=['GET'])
@@ -24,7 +24,7 @@ def get_students(field, value):
     try:
         return jsonify(DataLayer().filter_data(field, value))
     except Exception as e:
-        return jsonify({"error": (str(e))})
+        return jsonify({"message": f"error- {(str(e))}"})
 
 
 @app.route('/cr_up/<action>', methods=['POST'])
@@ -33,9 +33,18 @@ def cr_up(action):
         if request.method == 'POST' and action == "create":
             req_data = request.get_json()
             DataLayer().create_student(req_data)
-            return jsonify("Created")
+            return jsonify({"message": "Created"})
     except Exception as e:
-        return jsonify({"error": (str(e))})
+        return jsonify({"message": f"error- {(str(e))}"})
+
+
+@app.route('/del_student/<field>/<value>', methods=['DELETE'])
+def del_student(field, value):
+    try:
+        if request.method == 'DELETE':
+            return jsonify("Delete")
+    except Exception as e:
+        return jsonify({"message": f"error- {(str(e))}"})
 
 
 if __name__ == "__main__":
