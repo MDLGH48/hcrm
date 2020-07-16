@@ -51,6 +51,11 @@ class Student(DataLayer):
         self.d_skill = d_skill
         self.d_skill_level = d_skill_level
 
-    def update(self, content):
+    @property
+    def updated(self):
+        return self.updated
+
+    @updated.setter
+    def updated(self):
         self.updated = str(datetime.datetime.now())
         # self.update_all_students(content)
