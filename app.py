@@ -15,7 +15,7 @@ def api_response(content):
 
 @app.route('/', methods=["GET"])
 def index():
-    return api_response("welcome")
+    return api_response("welcome to the template crm")
 
 
 @app.route('/login_user', methods=["POST"])

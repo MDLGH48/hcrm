@@ -128,9 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# script to export env variables during build
-#  -- 
-# export DB_URI=db://user:pass@example.com/dbname...
-# python app.py
-*.sh
+#config script for env vars
+run_config.sh
 

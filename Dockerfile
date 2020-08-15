@@ -6,6 +6,7 @@ WORKDIR /app
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+
 EXPOSE 5000
 
-ENTRYPOINT ["sh", "start.sh"]
+ENTRYPOINT ["sh", "runconfig.sh"]
