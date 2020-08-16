@@ -2,7 +2,7 @@ import os
 import ssl
 import pymongo
 from bson.objectid import ObjectId
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 client = pymongo.MongoClient(
     os.getenv("MONGO_DB_URI"), ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
@@ -12,22 +12,20 @@ students_collection = crm_dev_db["students"]
 
 
 def sign_up(user_name, password, email):
+    hashed_password = generate_password_hash(password)
     user_collection.insert_one({
         "user": user_name,
-        "password": password,
+        "password": hashed_password,
         "email": email})
-    return {"message": "success",
-            "id": str(user_collection.find_one({'user': user_name})["_id"])}
+    return str(user_collection.find_one({'user': user_name})["_id"])
 
 
 def login(user_name, password):
     find_user = user_collection.find_one({'user': user_name})
-    if find_user == None:
-        return {"message": "error", "error_type": "bad_user"}
-    elif find_user["password"] != password:
-        return {"message": "error", "error_type": "bad_password"}
-    elif find_user["password"] == password:
-        return {"message": "success", "id": str(find_user["_id"])}
+    if check_password_hash(find_user["password"], password):
+        return {"user_id": str(find_user["_id"]), "authenticated": True}
+    else:
+        return {"authenticated": False}
 
 
 def create_data(user_id, student_data):
@@ -35,16 +33,14 @@ def create_data(user_id, student_data):
         if type(student_data) is dict:
             student_data.update({"user_id": user_id})
             students_collection.insert_one(student_data)
-            return {"message": {"success": student_data}}
         elif type(student_data) is list and all([type(student) is dict for student in student_data]):
             updated_user_students = [student.update(
                 {"user_id": user_id}) for student in student_data]
             students_collection.insert_many(updated_user_students)
-            return {"message": {"success": updated_user_students}}
         else:
-            return {"message": student_data}
+            return "data error"
     except Exception as e:
-        return {"error": str(e)}
+        return str(e)
 
 
 def get_data(user_id, mode=None, key=None, val=None):
@@ -68,15 +64,16 @@ def get_data(user_id, mode=None, key=None, val=None):
         return parsed_filtered
 
 
-def update_data(student_id, new_atts):
-    students_collection.update_one(
-        {"_id": ObjectId(student_id)}, {"$set": new_atts})
-    return students_collection.find_one({"_id": ObjectId(student_id)})
+def update_data(user_id, student_id, **kwargs):
+    try:
+        students_collection.update_one(
+            {"_id": ObjectId(student_id), "user_id": user_id}, {"$set": kwargs})
+    except Exception as e:
+        return str(e)
 
 
 def delete_data(student_id):
     try:
         students_collection.delete_one({"_id": ObjectId(student_id)})
-        return {"success": "deleted"}
     except Exception as e:
-        return {"error": str(e)}
+        return str(e)

@@ -9,4 +9,4 @@ RUN pip install --upgrade pip && \
 
 EXPOSE 5000
 
-ENTRYPOINT ["sh", "runconfig.sh"]
+ENTRYPOINT ["sh", "run_config.sh"]
